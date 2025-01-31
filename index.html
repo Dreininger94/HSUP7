@@ -248,6 +248,16 @@
         .dark-mode input[type="checkbox"] {
             filter: invert(1); /* Invert colors for dark mode */
         }
+        .negative-total {
+            color: red !important;
+            font-weight: bold;
+        }
+        .dark-mode .negative-total td {
+            color: red !important;
+        }
+        .dark-mode .negative-total {
+            color: red !important;
+        }
     </style>
     <script>
         let currentInputIndex = -1;
@@ -307,7 +317,7 @@
                 while (date.getMonth() === month) {
                     const dateString = date.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
                     const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
-                    
+
                     const row = document.createElement('tr');
 
                     let cell = document.createElement('td');
@@ -329,6 +339,7 @@
                         input.addEventListener('focus', () => {
                             currentInputIndex = inputsArray.indexOf(input);
                         });
+                        input.addEventListener('input', limitInput);
                         if (yearData[dateString] && yearData[dateString][idx]) {
                             input.value = yearData[dateString][idx];
                         }
@@ -420,6 +431,7 @@
                 yearData[dateString] = [inputs[0].value ? inputs[0].value : '', inputs[1].value ? inputs[1].value : '', jPlusOneCheckbox.checked ? 'checked' : ''];
             }
             saveYearData(document.getElementById('year').value);
+            checkNegativeTotal(row);
         }
 
         function parseTime(timeStr) {
@@ -591,6 +603,8 @@
             generateYears();
             generateTable();
             document.addEventListener('keydown', handleKeyPress);
+            document.getElementById('lunch-start').addEventListener('input', limitInput);
+            document.getElementById('lunch-end').addEventListener('input', limitInput);
         };
 
         function calculateLunchBreakDuration() {
@@ -663,6 +677,35 @@
                 }
             });
         });
+
+        function checkNegativeTotal(row) {
+            const totalCell = row.querySelector('td:last-child');
+            const totalValue = totalCell.textContent;
+            const [hours, minutes] = totalValue.split(':').map(Number);
+            const totalMinutes = hours * 60 + minutes;
+
+            if (totalMinutes < 0) {
+                row.classList.add('negative-total');
+            } else {
+                row.classList.remove('negative-total');
+            }
+        }
+
+        function limitInput(event) {
+            const input = event.target;
+            let value = input.value;
+
+            // Remove any non-digit characters
+            value = value.replace(/\D/g, '');
+
+            // Limit the value to 4 characters
+            if (value.length > 4) {
+                value = value.slice(0, 4);
+            }
+
+            // Update the input value
+            input.value = value;
+        }
     </script>
 </head>
 <body>
@@ -681,7 +724,7 @@
         </div>
 
         <div class="lunch-break-container">
-            Pause déjeuner:  
+            Pause déjeuner:
             <input type="text" id="lunch-start" pattern="\\d{4}" placeholder="0000" oninput="calculateLunchBreakDuration()">
             <span id="lunch-duration"></span>
             <input type="text" id="lunch-end" pattern="\\d{4}" placeholder="0000" oninput="calculateLunchBreakDuration()">
