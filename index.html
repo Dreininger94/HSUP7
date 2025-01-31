@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Choix Année et Tableau de Jours</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+        .dark-mode table, .dark-mode th, .dark-mode td {
+            border-color: #bdc3c7;
+        }
+        .dark-mode input[type="text"] {
+            color: black;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .controls select, .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .controls select {
+            padding-right: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 8px;
+        }
+        .controls button {
+            background-color: #164f19; /* Dark Green */
+            color: white;
+        }
+        .controls button:hover {
+            background-color: #1a5d1c; /* Slightly darker green */
+        }
+        .controls .toggle-dark-mode {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .controls .toggle-dark-mode:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        th {
+            background-color: #164f19; /* Dark Green */
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        tr.dark-mode:nth-child(even):hover {
+            background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+        }
+        tr.dark-mode:nth-child(even) {
+            background-color: #646464; /* Dark Gray for even rows in dark mode */
+        }
+        input[type="text"] {
+            width: 60px;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+        input[type="text"]:focus {
+            border-color: #164f19; /* Dark Green */
+            outline: none;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .lunch-break-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .lunch-break-container span {
+            margin-left: 10px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+        .modal h2 {
+            margin-top: 0;
+        }
+        .modal input[type="text"], .modal input[type="radio"] {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100px; /* Adjusted width for better alignment */
+            box-sizing: border-box;
+        }
+        .modal button {
+            background-color: #164f19; /* Dark Green */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-end;
+            margin-top: 10px;
+        }
+        .modal button:hover {
+            background-color: #1a5d1c; /* Slightly darker green */
+        }
+        .modal-content.dark-mode {
+            background-color: #34495e;
+            color: #ecf0f1;
+        }
+        .modal-content.dark-mode input[type="text"] {
+            color: black;
+            background-color: #c3c3c3; /* Medium Gray */
+        }
+        .modal-content.dark-mode .close {
+            color: #ecf0f1;
+        }
+        .modal-content.dark-mode button {
+            background-color: #164f19; /* Dark Green */
+        }
+        .modal-content.dark-mode button:hover {
+            background-color: #1a5d1c; /* Slightly darker green */
+        }
+        .dark-mode table {
+            background-color: #34495e;
+        }
+        .dark-mode tr:nth-child(even) {
+            background-color: #646464; /* Dark Gray for even rows in dark mode */
+        }
+        .dark-mode th {
+            background-color: #164f19; /* Dark Green */
+        }
+        .dark-mode input[type="text"] {
+            background-color: #c3c3c3; /* Medium Gray */
+        }
+        .dark-mode td {
+            color: #ecf0f1;
+        }
+        .dark-mode .controls select {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23ecf0f1" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+        }
+        .dark-mode .controls button {
+            background-color: #164f19; /* Dark Green */
+        }
+        .dark-mode .controls button:hover {
+            background-color: #1a5d1c; /* Slightly darker green */
+        }
+        .dark-mode .toggle-dark-mode {
+            background-color: #164f19; /* Dark Green */
+        }
+        .dark-mode .toggle-dark-mode:hover {
+            background-color: #1a5d1c; /* Slightly darker green */
+        }
+        .dark-mode tr:hover {
+            background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+        }
+        .dark-mode tr:nth-child(even):hover {
+            background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+        }
+        .dark-mode input[type="checkbox"] {
+            filter: invert(1); /* Invert colors for dark mode */
+        }
+    </style>
+    <script>
+        let currentInputIndex = -1;
+        let inputsArray = [];
+        let yearData = {};
+        let lunchStart = "0000";
+        let lunchEnd = "0000";
+
+        function loadLunchBreak(year) {
+            const storedLunch = JSON.parse(localStorage.getItem(`lunchBreak_${year}`)) || { start: "0000", end: "0000" };
+            lunchStart = storedLunch.start;
+            lunchEnd = storedLunch.end;
+            document.getElementById('lunch-start').value = lunchStart;
+            document.getElementById('lunch-end').value = lunchEnd;
+            calculateLunchBreakDuration();
+        }
+
+        function saveLunchBreak(year) {
+            if (lunchStart !== "0000" || lunchEnd !== "0000") {
+                localStorage.setItem(`lunchBreak_${year}`, JSON.stringify({ start: lunchStart, end: lunchEnd }));
+            } else {
+                localStorage.removeItem(`lunchBreak_${year}`);
+            }
+        }
+
+        function generateYears() {
+            const currentYear = new Date().getFullYear();
+            const yearSelect = document.getElementById('year');
+            for (let i = 0; i < 5; i++) {
+                const option = document.createElement('option');
+                option.value = currentYear - i;
+                option.textContent = currentYear - i;
+                yearSelect.appendChild(option);
+            }
+            loadYearData(currentYear);
+            loadLunchBreak(currentYear);
+        }
+
+        function loadYearData(year) {
+            yearData = JSON.parse(localStorage.getItem(`yearData_${year}`)) || {};
+        }
+
+        function saveYearData(year) {
+            localStorage.setItem(`yearData_${year}`, JSON.stringify(yearData));
+        }
+
+        function generateTable() {
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+            loadYearData(selectedYear);
+            loadLunchBreak(selectedYear);
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+
+            for (let month = 0; month < 12; month++) {
+                const date = new Date(selectedYear, month, 1);
+                while (date.getMonth() === month) {
+                    const dateString = date.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+                    const dayName = date.toLocaleDateString('fr-FR', { weekday: 'long' });
+                    
+                    const row = document.createElement('tr');
+
+                    let cell = document.createElement('td');
+                    cell.textContent = dateString;
+                    row.appendChild(cell);
+
+                    cell = document.createElement('td');
+                    cell.textContent = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+                    row.appendChild(cell);
+
+                    ['Début', 'Fin'].forEach((field, idx) => {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.pattern = '\\d{4}';
+                        input.placeholder = '0000';
+                        input.size = 5;
+                        input.onchange = () => calculateTotal({ target: input });
+                        input.setAttribute('tabindex', '0');
+                        input.addEventListener('focus', () => {
+                            currentInputIndex = inputsArray.indexOf(input);
+                        });
+                        if (yearData[dateString] && yearData[dateString][idx]) {
+                            input.value = yearData[dateString][idx];
+                        }
+                        cell = document.createElement('td');
+                        cell.appendChild(input);
+                        row.appendChild(cell);
+                        inputsArray.push(input);
+                    });
+
+                    // Ajout de la colonne "J+1"
+                    const jPlusOneCell = document.createElement('td');
+                    const jPlusOneCheckbox = document.createElement('input');
+                    jPlusOneCheckbox.type = 'checkbox';
+                    jPlusOneCheckbox.onchange = function() {
+                        calculateTotal({ target: row.querySelectorAll('input')[1] });
+                    };
+                    if (yearData[dateString] && yearData[dateString][2] === 'checked') {
+                        jPlusOneCheckbox.checked = true;
+                    }
+                    jPlusOneCell.appendChild(jPlusOneCheckbox);
+                    row.appendChild(jPlusOneCell);
+
+                    cell = document.createElement('td');
+                    cell.id = `total-${dateString}`;
+                    row.appendChild(cell);
+                    calculateTotal({ target: row.querySelector('input') });
+
+                    tableBody.appendChild(row);
+                    date.setDate(date.getDate() + 1);
+                }
+            }
+        }
+
+        function createCustomRadio(name, value) {
+            const container = document.createElement('div');
+            container.classList.add('custom-radio');
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = name;
+            radio.value = value;
+            container.appendChild(radio);
+            return container;
+        }
+
+        function calculateTotal(event) {
+            const row = event.target.parentElement.parentElement;
+            const inputs = row.querySelectorAll('input[type="text"]');
+            const debut = parseTime(inputs[0].value);
+            const fin = parseTime(inputs[1].value);
+            const totalCell = row.querySelector('td:last-child');
+            const jPlusOneCheckbox = row.querySelector('input[type="checkbox"]');
+            const dateString = row.cells[0].textContent;
+
+            const dayName = row.cells[1].textContent.toLowerCase();
+
+            if (debut !== null && fin !== null) {
+                let diff = (fin - debut) / (60 * 1000); // difference in minutes
+
+                // Ajoute 24 heures si la checkbox "J+1" est cochée
+                if (jPlusOneCheckbox.checked) {
+                    diff += 1440; // 24 heures en minutes
+                }
+
+                // Calculate lunch break duration and subtract it if applicable
+                if (dayName !== 'samedi' && dayName !== 'dimanche') {
+                    const lunchStartTime = parseTime(lunchStart);
+                    const lunchEndTime = parseTime(lunchEnd);
+
+                    // Si J+1 n'est pas coché
+                    if (!jPlusOneCheckbox.checked) {
+                        if (debut < lunchStartTime && fin > lunchEndTime) {
+                            diff -= (lunchEndTime - lunchStartTime) / (60 * 1000);
+                        }
+                    } else {
+                        // Si J+1 est coché, on compare avec fin + 24 heures
+                        const extendedFin = fin + 1440 * 60 * 1000; // Adding 24 hours to fin
+                        if (debut < lunchStartTime && extendedFin > lunchEndTime) {
+                            diff -= (lunchEndTime - lunchStartTime) / (60 * 1000);
+                        }
+                    }
+                }
+
+                const hours = Math.floor(diff / 60);
+                const minutes = diff % 60;
+                totalCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                yearData[dateString] = [inputs[0].value, inputs[1].value, jPlusOneCheckbox.checked ? 'checked' : ''];
+            } else {
+                totalCell.textContent = '';
+                yearData[dateString] = [inputs[0].value ? inputs[0].value : '', inputs[1].value ? inputs[1].value : '', jPlusOneCheckbox.checked ? 'checked' : ''];
+            }
+            saveYearData(document.getElementById('year').value);
+        }
+
+        function parseTime(timeStr) {
+            if (!timeStr || timeStr.length !== 4 || isNaN(timeStr)) return null;
+            const hours = parseInt(timeStr.substring(0, 2));
+            const minutes = parseInt(timeStr.substring(2, 4));
+            if (hours > 23 || minutes > 59) return null;
+            return hours * 60 * 60 * 1000 + minutes * 60 * 1000;
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const modals = document.querySelectorAll('.modal-content');
+            modals.forEach(modal => {
+                modal.classList.toggle('dark-mode', document.body.classList.contains('dark-mode'));
+            });
+            regenerateTotals();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 't') {
+                toggleDarkMode();
+            } else if (event.key === 'ArrowRight') {
+                if (currentInputIndex < inputsArray.length - 1) {
+                    inputsArray[currentInputIndex + 1].focus();
+                }
+            } else if (event.key === 'ArrowLeft') {
+                if (currentInputIndex > 0) {
+                    inputsArray[currentInputIndex - 1].focus();
+                }
+            } else if (event.key === 'ArrowDown') {
+                const currentRow = Math.floor(currentInputIndex / 2);
+                const newRow = currentRow + 1;
+                if (newRow * 2 < inputsArray.length) {
+                    inputsArray[newRow * 2 + (currentInputIndex % 2)].focus();
+                }
+            } else if (event.key === 'ArrowUp') {
+                const currentRow = Math.floor(currentInputIndex / 2);
+                const newRow = currentRow - 1;
+                if (newRow >= 0) {
+                    inputsArray[newRow * 2 + (currentInputIndex % 2)].focus();
+                }
+            }
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const modalContent = modal.querySelector('.modal-content');
+            modal.style.display = "block";
+            if (document.body.classList.contains('dark-mode')) {
+                modalContent.classList.add('dark-mode');
+            } else {
+                modalContent.classList.remove('dark-mode');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        function applyDefaultHours() {
+            const begin = document.getElementById('default-begin').value;
+            const end = document.getElementById('default-end').value;
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const dayName = row.cells[1].textContent.toLowerCase();
+                if (dayName !== 'samedi' && dayName !== 'dimanche') {
+                    const inputs = row.querySelectorAll('input[type="text"]');
+                    if (!inputs[0].value || inputs[0].value === '0000') {
+                        inputs[0].value = begin;
+                        inputs[0].dispatchEvent(new Event('change'));
+                    }
+                    if (!inputs[1].value || inputs[1].value === '0000') {
+                        inputs[1].value = end;
+                        inputs[1].dispatchEvent(new Event('change'));
+                    }
+                }
+            });
+            saveYearData(selectedYear);
+            closeModal('heures-types-modal');
+        }
+
+        function replaceValues() {
+            const column = document.querySelector('input[name="replace-column"]:checked').value;
+            const oldValue = document.getElementById('old-value').value;
+            const newValue = document.getElementById('new-value').value;
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                const index = column === 'begin' ? 0 : 1;
+                if (inputs[index].value === oldValue) {
+                    inputs[index].value = newValue;
+                    inputs[index].dispatchEvent(new Event('change'));
+                }
+            });
+            saveYearData(selectedYear);
+            closeModal('remplacer-modal');
+        }
+
+        function clearData() {
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                inputs[0].value = '';
+                inputs[1].value = '';
+                inputs[0].dispatchEvent(new Event('change'));
+                inputs[1].dispatchEvent(new Event('change'));
+                const jPlusOneCheckbox = row.querySelector('input[type="checkbox"]');
+                jPlusOneCheckbox.checked = false;
+                jPlusOneCheckbox.dispatchEvent(new Event('change'));
+            });
+            yearData = {};
+            saveYearData(selectedYear);
+            saveLunchBreak(selectedYear);
+        }
+
+        function exportData() {
+            let DEJContent = '<DEJ>\n';
+            let HOURSContent = '<HOURS>\n';
+
+            // Collect lunch break data for each year
+            for (let year = new Date().getFullYear(); year > new Date().getFullYear() - 5; year--) {
+                const storedLunch = JSON.parse(localStorage.getItem(`lunchBreak_${year}`)) || { start: "0000", end: "0000" };
+                if (storedLunch.start !== "0000" || storedLunch.end !== "0000") {
+                    DEJContent += `${year};${storedLunch.start};${storedLunch.end}\n`;
+                }
+            }
+            DEJContent += '</DEJ>';
+
+            // Collect hours data for each year including J+1 checkbox state
+            for (let year = new Date().getFullYear(); year > new Date().getFullYear() - 5; year--) {
+                const yearData = JSON.parse(localStorage.getItem(`yearData_${year}`)) || {};
+                Object.keys(yearData).forEach(dateString => {
+                    const [begin, end, checked] = yearData[dateString];
+                    if ((begin && begin !== '0000') || (end && end !== '0000')) {
+                        const formattedDate = dateString.replace(/-/g, '/');
+                        HOURSContent += `${formattedDate};${begin};${end};${checked === 'checked' ? 'OUI' : 'NON'}\n`;
+                    }
+                });
+            }
+            HOURSContent += '</HOURS>';
+
+            // Combine the contents
+            const content = DEJContent + '\n' + HOURSContent;
+
+            // Create a Blob with the content
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            // Create an anchor element to download the file
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `EXPORT_HSUP_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = function() {
+            generateYears();
+            generateTable();
+            document.addEventListener('keydown', handleKeyPress);
+        };
+
+        function calculateLunchBreakDuration() {
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+            const start = document.getElementById('lunch-start').value;
+            const end = document.getElementById('lunch-end').value;
+
+            const startTime = parseTime(start);
+            const endTime = parseTime(end);
+
+            if (startTime !== null && endTime !== null) {
+                const diff = (endTime - startTime) / (60 * 1000); // difference in minutes
+                const hours = Math.floor(diff / 60);
+                const minutes = diff % 60;
+                document.getElementById('lunch-duration').textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                lunchStart = start;
+                lunchEnd = end;
+                saveLunchBreak(selectedYear);
+                regenerateTotals();
+            } else {
+                document.getElementById('lunch-duration').textContent = '';
+                lunchStart = "0000";
+                lunchEnd = "0000";
+                saveLunchBreak(selectedYear);
+            }
+        }
+
+        function regenerateTotals() {
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                inputs[0].dispatchEvent(new Event('change'));
+                inputs[1].dispatchEvent(new Event('change'));
+                row.querySelector('input[type="checkbox"]').dispatchEvent(new Event('change')); // Recalculate totals including J+1
+            });
+        }
+
+        function initializeLunchBreakInputs() {
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+            loadLunchBreak(selectedYear);
+            document.getElementById('lunch-start').value = lunchStart;
+            document.getElementById('lunch-end').value = lunchEnd;
+        }
+
+        function onYearChange() {
+            const yearSelect = document.getElementById('year');
+            const selectedYear = parseInt(yearSelect.value);
+            generateTable();
+            initializeLunchBreakInputs();
+            saveLunchBreak(selectedYear);
+        }
+
+        document.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            const customRadios = document.querySelectorAll('.custom-radio');
+            customRadios.forEach(radio => {
+                if (event.target == radio.querySelector('input')) {
+                    document.querySelectorAll('.custom-radio').forEach(r => r.classList.remove('checked'));
+                    radio.classList.add('checked');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <button class="toggle-dark-mode" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+    <div class="container">
+        <div class="controls">
+            <select id="year" onchange="onYearChange()">
+            </select>
+            <div>
+                <button onclick="openModal('heures-types-modal')">Heures types</button>
+                <button onclick="openModal('remplacer-modal')">Remplacer</button>
+                <button onclick="clearData()">Effacer données</button>
+                <button onclick="exportData()">Exporter</button>
+            </div>
+        </div>
+
+        <div class="lunch-break-container">
+            Pause déjeuner:  
+            <input type="text" id="lunch-start" pattern="\\d{4}" placeholder="0000" oninput="calculateLunchBreakDuration()">
+            <span id="lunch-duration"></span>
+            <input type="text" id="lunch-end" pattern="\\d{4}" placeholder="0000" oninput="calculateLunchBreakDuration()">
+        </div>
+
+        <div id="heures-types-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('heures-types-modal')">&times;</span>
+                <h2>Définir heures types</h2>
+                Début: <input type="text" id="default-begin" pattern="\\d{4}" placeholder="0000"><br>
+                Fin: <input type="text" id="default-end" pattern="\\d{4}" placeholder="0000"><br>
+                <button onclick="applyDefaultHours()">Valider</button>
+            </div>
+        </div>
+
+        <div id="remplacer-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('remplacer-modal')">&times;</span>
+                <h2>Remplacer valeurs</h2>
+                <label>
+                    <div class="custom-radio" onclick="document.querySelector('input[name=\'replace-column\'][value=\'begin\']').click()">
+                        <input type="radio" name="replace-column" value="begin" checked>
+                    </div>
+                    Début
+                </label>
+                <label>
+                    <div class="custom-radio" onclick="document.querySelector('input[name=\'replace-column\'][value=\'end\']').click()">
+                        <input type="radio" name="replace-column" value="end">
+                    </div>
+                    Fin
+                </label><br>
+                Ancienne valeur: <input type="text" id="old-value" pattern="\\d{4}" placeholder="0000"><br>
+                Nouvelle valeur: <input type="text" id="new-value" pattern="\\d{4}" placeholder="0000"><br>
+                <button onclick="replaceValues()">Valider</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Jour</th>
+                    <th>Début</th>
+                    <th>Fin</th>
+                    <th>J+1</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
