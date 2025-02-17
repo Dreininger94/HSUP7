@@ -1,1 +1,305 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+}
 
+.dark-mode {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+}
+
+.dark-mode table, .dark-mode th, .dark-mode td {
+    border-color: #bdc3c7;
+}
+
+.dark-mode input[type="text"] {
+    color: black;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.controls select, .controls button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.controls select {
+    padding-right: 30px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 8px;
+}
+
+.controls button {
+    background-color: #164f19; /* Dark Green */
+    color: white;
+}
+
+.controls button:hover {
+    background-color: #1a5d1c; /* Slightly darker green */
+}
+
+.controls .toggle-dark-mode {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.controls .toggle-dark-mode:hover {
+    background-color: #2980b9;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+th {
+    background-color: #164f19; /* Dark Green */
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+tr.dark-mode:nth-child(even):hover {
+    background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+}
+
+tr.dark-mode:nth-child(even) {
+    background-color: #646464; /* Dark Gray for even rows in dark mode */
+}
+
+input[type="text"] {
+    width: 60px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+    background-color: white;
+}
+
+input[type="text"]:focus {
+    border-color: #164f19; /* Dark Green */
+    outline: none;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.lunch-break-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.lunch-break-container span {
+    margin-left: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal h2 {
+    margin-top: 0;
+}
+
+.modal input[type="text"], .modal input[type="radio"] {
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100px; /* Adjusted width for better alignment */
+    box-sizing: border-box;
+}
+
+.modal button {
+    background-color: #164f19; /* Dark Green */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-top: 10px;
+}
+
+.modal button:hover {
+    background-color: #1a5d1c; /* Slightly darker green */
+}
+
+.modal-content.dark-mode {
+    background-color: #34495e;
+    color: #ecf0f1;
+}
+
+.modal-content.dark-mode input[type="text"] {
+    color: black;
+    background-color: #c3c3c3; /* Medium Gray */
+}
+
+.modal-content.dark-mode .close {
+    color: #ecf0f1;
+}
+
+.modal-content.dark-mode button {
+    background-color: #164f19; /* Dark Green */
+}
+
+.modal-content.dark-mode button:hover {
+    background-color: #1a5d1c; /* Slightly darker green */
+}
+
+.dark-mode table {
+    background-color: #34495e;
+}
+
+.dark-mode tr:nth-child(even) {
+    background-color: #646464; /* Dark Gray for even rows in dark mode */
+}
+
+.dark-mode th {
+    background-color: #164f19; /* Dark Green */
+}
+
+.dark-mode input[type="text"] {
+    background-color: #c3c3c3; /* Medium Gray */
+}
+
+.dark-mode td {
+    color: #ecf0f1;
+}
+
+.dark-mode .controls select {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23ecf0f1" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+}
+
+.dark-mode .controls button {
+    background-color: #164f19; /* Dark Green */
+}
+
+.dark-mode .controls button:hover {
+    background-color: #1a5d1c; /* Slightly darker green */
+}
+
+.dark-mode .toggle-dark-mode {
+    background-color: #164f19; /* Dark Green */
+}
+
+.dark-mode .toggle-dark-mode:hover {
+    background-color: #1a5d1c; /* Slightly darker green */
+}
+
+.dark-mode tr:hover {
+    background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+}
+
+.dark-mode tr:nth-child(even):hover {
+    background-color: #7f7f7f; /* Medium Gray for hover in dark mode */
+}
+
+.dark-mode input[type="checkbox"] {
+    filter: invert(1); /* Invert colors for dark mode */
+}
+
+.negative-total {
+    color: red !important;
+    font-weight: bold;
+}
+
+.dark-mode .negative-total td {
+    color: red !important;
+}
+
+.dark-mode .negative-total {
+    color: red !important;
+}
