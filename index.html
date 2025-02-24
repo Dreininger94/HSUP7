@@ -5,12 +5,10 @@
     <title>Choix Année et Tableau de Jours</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/styles.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <button class="toggle-dark-mode" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-
     <div class="container">
+        <button class="toggle-dark-mode" onclick="toggleDarkMode()">Toggle Dark Mode</button>
         <div class="controls">
             <select id="year" onchange="onYearChange()"></select>
             <div>
@@ -69,6 +67,7 @@
                     <th>Fin</th>
                     <th>J+1</th>
                     <th>Total</th>
+                    <th>Commentaires</th>
                 </tr>
             </thead>
             <tbody id="table-body"></tbody>
