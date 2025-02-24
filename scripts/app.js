@@ -39,7 +39,7 @@ function loadYearData(year) {
 
 function saveYearData(date, data) {
     // Vérifier que les données ne sont pas undefined avant de les sauvegarder
-    if (date && Array.isArray(data) && data.length === 3) {
+    if (date && Array.isArray(data) && (data.length === 3 || data.length === 4)) {
         localStorage.setItem(date, JSON.stringify(data));
     } else {
         console.error(`Invalid data for date ${date}:`, data);
@@ -69,6 +69,7 @@ function generateTable() {
     loadLunchBreak(selectedYear);
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
+    inputsArray = []; // Reset the inputs array before regenerating the table
 
     for (let month = 0; month < 12; month++) {
         const date = new Date(selectedYear, month, 1);
@@ -113,15 +114,49 @@ function generateTable() {
             jPlusOneCheckbox.onchange = function() {
                 calculateTotal({ target: row.querySelectorAll('input')[1] });
             };
+            jPlusOneCheckbox.setAttribute('tabindex', '0');
+            jPlusOneCheckbox.addEventListener('focus', () => {
+                currentInputIndex = inputsArray.indexOf(jPlusOneCheckbox);
+            });
             if (yearData[dateString] && yearData[dateString][2] === 'checked') {
                 jPlusOneCheckbox.checked = true;
             }
             jPlusOneCell.appendChild(jPlusOneCheckbox);
             row.appendChild(jPlusOneCell);
+            inputsArray.push(jPlusOneCheckbox);
 
             cell = document.createElement('td');
             cell.id = `total-${dateString}`;
             row.appendChild(cell);
+            
+            // Add comments cell
+            cell = document.createElement('td');
+            const commentInput = document.createElement('input');
+            commentInput.type = 'text';
+            commentInput.placeholder = 'Commentaire';
+            commentInput.className = 'comment-input';
+            commentInput.style.width = '200px';
+            commentInput.setAttribute('tabindex', '0');
+            commentInput.addEventListener('focus', () => {
+                currentInputIndex = inputsArray.indexOf(commentInput);
+            });
+            commentInput.addEventListener('input', () => {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                const jPlusOneCheckbox = row.querySelector('input[type="checkbox"]');
+                saveYearData(dateString, [
+                    inputs[0].value,
+                    inputs[1].value,
+                    jPlusOneCheckbox.checked ? 'checked' : '',
+                    commentInput.value
+                ]);
+            });
+            if (yearData[dateString] && yearData[dateString][3]) {
+                commentInput.value = yearData[dateString][3];
+            }
+            cell.appendChild(commentInput);
+            row.appendChild(cell);
+            inputsArray.push(commentInput);
+            
             calculateTotal({ target: row.querySelector('input') });
 
             tableBody.appendChild(row);
@@ -135,8 +170,9 @@ function calculateTotal(event) {
     const inputs = row.querySelectorAll('input[type="text"]');
     const debut = parseTime(inputs[0].value);
     const fin = parseTime(inputs[1].value);
-    const totalCell = row.querySelector('td:last-child');
+    const totalCell = row.querySelector('td[id^="total-"]');
     const jPlusOneCheckbox = row.querySelector('input[type="checkbox"]');
+    const commentInput = row.querySelector('.comment-input');
     const dateString = row.cells[0].textContent;
 
     const dayName = row.cells[1].textContent.toLowerCase();
@@ -167,10 +203,10 @@ function calculateTotal(event) {
         const hours = Math.floor(diff / 60);
         const minutes = diff % 60;
         totalCell.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-        saveYearData(dateString, [inputs[0].value, inputs[1].value, jPlusOneCheckbox.checked ? 'checked' : '']);
+        saveYearData(dateString, [inputs[0].value, inputs[1].value, jPlusOneCheckbox.checked ? 'checked' : '', commentInput ? commentInput.value : '']);
     } else {
         totalCell.textContent = '';
-        saveYearData(dateString, [inputs[0].value ? inputs[0].value : '', inputs[1].value ? inputs[1].value : '', jPlusOneCheckbox.checked ? 'checked' : '']);
+        saveYearData(dateString, [inputs[0].value ? inputs[0].value : '', inputs[1].value ? inputs[1].value : '', jPlusOneCheckbox.checked ? 'checked' : '', commentInput ? commentInput.value : '']);
     }
     checkNegativeTotal(row);
 }
@@ -184,12 +220,16 @@ function clearData() {
         const inputs = row.querySelectorAll('input[type="text"]');
         inputs[0].value = '';
         inputs[1].value = '';
+        const commentInput = row.querySelector('.comment-input');
+        if (commentInput) {
+            commentInput.value = '';
+        }
         inputs[0].dispatchEvent(new Event('change'));
         inputs[1].dispatchEvent(new Event('change'));
         const jPlusOneCheckbox = row.querySelector('input[type="checkbox"]');
         jPlusOneCheckbox.checked = false;
         jPlusOneCheckbox.dispatchEvent(new Event('change'));
-        saveYearData(dateString, ["", "", ""]);
+        saveYearData(dateString, ["", "", "", ""]);
     });
 }
 
@@ -215,19 +255,26 @@ function exportData() {
     }
     DEJContent += '</DEJ>';
 
-    // Collect hours data for each year including J+1 checkbox state
+    // Collect and sort hours data chronologically
+    const hoursData = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         const value = localStorage.getItem(key);
-        if (value) {
+        if (value && key.match(/\d{2}-\d{2}-\d{4}/)) {
             try {
                 const data = JSON.parse(value);
-                if (Array.isArray(data) && data.length === 3) {
-                    const [begin, end, checked] = data;
-                    if ((begin && begin !== '0000') || (end && end !== '0000')) {
+                if (Array.isArray(data)) {
+                    const [begin, end, checked, comment] = data;
+                    if (comment || (begin && begin !== '0000' && end && end !== '0000')) {
                         // Convert date format from jj-MM-YYYY to jj/MM/YYYY
                         const formattedDate = key.replace(/-/g, '/');
-                        HOURSContent += `${formattedDate};${begin};${end};${checked === 'checked' ? 'OUI' : 'NON'}\n`;
+                        const [day, month, year] = key.split('-');
+                        const dateObj = new Date(year, parseInt(month) - 1, parseInt(day));
+                        hoursData.push({
+                            date: dateObj,
+                            line: `${formattedDate};${begin || ''};${end || ''};${checked === 'checked' ? 'OUI' : 'NON'};${comment || ''}
+`
+                        });
                     }
                 }
             } catch (e) {
@@ -235,13 +282,21 @@ function exportData() {
             }
         }
     }
+
+    // Sort the data chronologically
+    hoursData.sort((a, b) => a.date - b.date);
+
+    // Add sorted lines to HOURSContent
+    hoursData.forEach(item => {
+        HOURSContent += item.line;
+    })
     HOURSContent += '</HOURS>';
 
     // Combine the contents
     const content = DEJContent + '\n' + HOURSContent;
 
-    // Create a Blob with the content
-    const blob = new Blob([content], { type: 'text/plain' });
+    // Create a Blob with the content using UTF-8 encoding
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
 
     // Create an anchor element to download the file
@@ -379,9 +434,12 @@ function parseTime(timeStr) {
 }
 
 function handleKeyPress(event) {
-    if (event.key === 't') {
+    if (event.key === 't' && !document.activeElement.classList.contains('comment-input')) {
         toggleDarkMode();
-    } else if (event.key === 'ArrowRight') {
+    } else if (event.key === ' ' && document.activeElement.type === 'checkbox') {
+        document.activeElement.click();
+        event.preventDefault();
+    } else if (event.key === 'ArrowRight' || event.key === 'Enter') {
         if (currentInputIndex < inputsArray.length - 1) {
             inputsArray[currentInputIndex + 1]?.focus();
         }
@@ -390,16 +448,18 @@ function handleKeyPress(event) {
             inputsArray[currentInputIndex - 1]?.focus();
         }
     } else if (event.key === 'ArrowDown') {
-        const currentRow = Math.floor(currentInputIndex / 2);
+        const currentRow = Math.floor(currentInputIndex / 4);
+        const currentCol = currentInputIndex % 4;
         const newRow = currentRow + 1;
-        if (newRow * 2 < inputsArray.length) {
-            inputsArray[newRow * 2 + (currentInputIndex % 2)]?.focus();
+        if (newRow * 4 + currentCol < inputsArray.length) {
+            inputsArray[newRow * 4 + currentCol]?.focus();
         }
     } else if (event.key === 'ArrowUp') {
-        const currentRow = Math.floor(currentInputIndex / 2);
+        const currentRow = Math.floor(currentInputIndex / 4);
+        const currentCol = currentInputIndex % 4;
         const newRow = currentRow - 1;
         if (newRow >= 0) {
-            inputsArray[newRow * 2 + (currentInputIndex % 2)]?.focus();
+            inputsArray[newRow * 4 + currentCol]?.focus();
         }
     }
 }
@@ -415,7 +475,7 @@ function toggleDarkMode() {
 }
 
 function checkNegativeTotal(row) {
-    const totalCell = row.querySelector('td:last-child');
+    const totalCell = row.querySelector('td[id^="total-"]');
     const totalValue = totalCell.textContent;
     const [hours, minutes] = totalValue.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
