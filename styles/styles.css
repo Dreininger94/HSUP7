@@ -98,7 +98,26 @@ th {
     background-color: #164f19; /* Dark Green */
     color: white;
 }
+.comment-input {
+    width: 100% !important;
+    min-width: 200px;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    transition: border-color 0.3s;
+}
 
+.comment-input:focus {
+    border-color: #164f19;
+    outline: none;
+}
+
+.dark-mode .comment-input {
+    background-color: #c3c3c3;
+    color: black;
+}
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
